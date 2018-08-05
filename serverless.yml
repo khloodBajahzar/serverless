@@ -1,369 +1,104 @@
-service: cloudsystems-serverless
-plugins:
-  - serverless-offline
-  - serverless-step-functions
-  - serverless-pseudo-parameters
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: aws-nodejs # NOTE: update this with your service name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
 provider:
   name: aws
-  runtime: nodejs8.10
-  region: eu-west-1
-  stage: dev
-  environment:
-    SENDER_EMAIL: ${env:SENDER_EMAIL}
-    CONTACT_EMAIL: ${env:CONTACT_EMAIL}
-    AUTH0_DOMAIN: ${env:AUTH0_DOMAIN}
-    AUTH0_CLIENT_ID: ${env:AUTH0_CLIENT_ID}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - ses:*
-        - dynamodb:*
-        - states:*
-        - lambda:*
-        - execute-api:*
-      Resource: '*'
+  runtime: nodejs6.10
+
+# you can overwrite defaults here
+#  stage: dev
+#  region: us-east-1
+
+# you can add statements to the Lambda function's IAM Role here
+#  iamRoleStatements:
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:ListBucket"
+#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:PutObject"
+#      Resource:
+#        Fn::Join:
+#          - ""
+#          - - "arn:aws:s3:::"
+#            - "Ref" : "ServerlessDeploymentBucket"
+#            - "/*"
+
+# you can define service wide environment variables here
+#  environment:
+#    variable1: value1
+
+# you can add packaging information here
+#package:
+#  include:
+#    - include-me.js
+#    - include-me-dir/**
+#  exclude:
+#    - exclude-me.js
+#    - exclude-me-dir/**
+
 functions:
-  authContributor:
-    handler: handler.authContributor
-  authTrainee:
-    handler: handler.authTrainee
-  # private:
-  #   handler: handler.private
-  #   events:
-  #     - http:
-  #         path: private
-  #         method: get
-  #         cors: true
-  #         authorizer: ${self:custom.authorizer.users}
-  sendEmailToAll:
-    handler: handler.sendEmailToAll
-    events:
-      - http:
-          path: emails
-          method: post
-          cors: true
-          authorizer: authContributor
-    environment:
-      SEND_EMAIL_LAMBDA_ARN: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-sendEmail"
-      # arn:aws:lambda:eu-west-1:510712368144:function:cloudsystems-serverless-dev-sendEmail
-  contactUs:
-    handler: handler.contactUs
-    events:
-      - http:
-          path: contact-us
-          method: post
-          cors: true
-  apply:
-    handler: handler.apply
-    events:
-      - http:
-          path: apply
-          method: post
-          cors: true
-    environment:
-      AFTER_TRAINEE_APPLIES_STATE_MACHINE_ARN: "arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:afterTraineeAppliesStateMachine"
-  notifyWhenTraineeApplies:
-    handler: handler.notifyWhenTraineeApplies
-  notifyWhenVotesCalculated:
-    handler: handler.notifyWhenVotesCalculated
-  vote:
-    handler: handler.vote
-    events:
-      - http:
-          path: vote
-          method: post
-          cors: true
-  accept:
-    handler: handler.accept
-    events:
-      - http:
-          path: accept
-          method: post
-          cors: true
-  listTrainees:
-    handler: handler.listTrainees
-    events:
-      - http:
-          path: trainees
-          method: get
-          cors: true
-          authorizer: authContributor
-  stringifyDeliveredTasks:
-    handler: handler.stringifyDeliveredTasks
-    events:
-      - http:
-          path: delivered-tasks
-          method: get
-          cors: true
-  listIndividualTasks:
-    handler: handler.listIndividualTasks
-    events:
-      - http:
-          path: individual-tasks
-          method: get
-          cors: true
-          authorizer: authContributor
-  # test:
-  #   handler: handler.test
-  #   events:
-  #     - http:
-  #         path: test
-  #         method: get
-  #         cors: true
-  sendEmail:
-    handler: handler.sendEmail
+  hello:
+    handler: handler.hello
 
-  # IndividualTasks
-  createIndividualTask:
-    handler: handler.createIndividualTask
+#    The following are a few example events you can configure
+#    NOTE: Please make sure to change your handler code to work with those events
+#    Check the event documentation for details
     events:
-      - http:
-          path: individual-tasks
-          method: post
-          cors: true
-          authorizer: authContributor
-    environment:
-      AFTER_INDIVIDUAL_TASK_CREATED_STATE_MACHINE_ARN: "arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:afterIndividualTaskCreatedStateMachine"
-  notifyWhenIndividualTaskCreated:
-    handler: handler.notifyWhenIndividualTaskCreated
-  notifyWhenIndividualTaskExpired:
-    handler: handler.notifyWhenIndividualTaskExpired
-  deliverIndividualTask:
-    handler: handler.deliverIndividualTask
-    events:
-      - http:
-          path: individual-tasks/deliver
-          method: post
-          cors: true
-          authorizer: authTrainee
-  correctIndividualTask:
-    handler: handler.correctIndividualTask
-    events:
-      - http:
-          path: individual-tasks/correct
-          method: post
-          cors: true
-          authorizer: authContributor
-  extendIndividualTask:
-    handler: handler.extendIndividualTask
-    events:
-      - http:
-          path: individual-tasks/extend
-          method: post
-          cors: true
-          authorizer: authContributor
+     - http:
+         path: users/create
+         method: get
+#      - s3: ${env:BUCKET}
+#      - schedule: rate(10 minutes)
+#      - sns: greeter-topic
+#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
+#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
+#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
+#      - iot:
+#          sql: "SELECT * FROM 'some_topic'"
+#      - cloudwatchEvent:
+#          event:
+#            source:
+#              - "aws.ec2"
+#            detail-type:
+#              - "EC2 Instance State-change Notification"
+#            detail:
+#              state:
+#                - pending
+#      - cloudwatchLog: '/aws/lambda/hello'
+#      - cognitoUserPool:
+#          pool: MyUserPool
+#          trigger: PreSignUp
 
-  # groupTasks
-  createGroupTasks:
-    handler: handler.createGroupTasks
-    events:
-      - http:
-          path: group-tasks
-          method: post
-          cors: true
-          authorizer: authContributor
-    environment:
-      AFTER_GROUP_TASK_CREATED_STATE_MACHINE_ARN: "arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:afterGroupTaskCreatedStateMachine"
-  notifyWhenGroupTaskCreated:
-    handler: handler.notifyWhenGroupTaskCreated
-  notifyWhenGroupTaskExpired:
-    handler: handler.notifyWhenGroupTaskExpired
-  deliverGroupTask:
-    handler: handler.deliverGroupTask
-    events:
-      - http:
-          path: group-tasks/deliver
-          method: post
-          cors: true
-          authorizer: authTrainee
-  correctGroupTask:
-    handler: handler.correctGroupTask
-    events:
-      - http:
-          path: group-tasks/correct
-          method: post
-          cors: true
-          authorizer: authContributor
+#    Define function environment variables here
+#    environment:
+#      variable2: value2
 
-  authTraineeInfo:
-    handler: handler.authTraineeInfo
-    events:
-      - http:
-          path: auth/trainees
-          method: get
-          cors: true
-          authorizer: authTrainee
-  authContributorInfo:
-    handler: handler.authContributorInfo
-    events:
-      - http:
-          path: auth/contributors
-          method: get
-          cors: true
-          authorizer: authContributor
-  visitAnswer:
-    handler: handler.visitAnswer
-    events:
-      - http:
-          path: answers
-          method: get
-          cors: true
-
-stepFunctions:
-  stateMachines:
-    afterTraineeAppliesStateMachine:
-      name: afterTraineeAppliesStateMachine
-      definition:
-        Comment: A state machine happens after a trainee applies.
-        StartAt: notifyWhenTraineeApplies
-        States:
-          notifyWhenTraineeApplies:
-            Type: Task
-            Resource: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-notifyWhenTraineeApplies"
-            Next: waitForPeriodOfTime
-          waitForPeriodOfTime:
-            Type: Wait
-            Seconds: 172800
-            Next: notifyWhenVotesCalculated
-          notifyWhenVotesCalculated:
-            Type: Task
-            Resource: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-notifyWhenVotesCalculated"
-            End: true
-    afterIndividualTaskCreatedStateMachine:
-      name: afterIndividualTaskCreatedStateMachine
-      definition:
-        Comment: A state machine happens after an individual task is created.
-        StartAt: notifyWhenIndividualTaskCreated
-        States:
-          notifyWhenIndividualTaskCreated:
-            Type: Task
-            Resource: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-notifyWhenIndividualTaskCreated"
-            Next: waitUntilExpiry
-          waitUntilExpiry:
-            Type: Wait
-            SecondsPath: "$.expiresAfterInSeconds"
-            Next: notifyWhenIndividualTaskExpired
-          notifyWhenIndividualTaskExpired:
-            Type: Task
-            Resource: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-notifyWhenIndividualTaskExpired"
-            End: true
-    afterGroupTaskCreatedStateMachine:
-      name: afterGroupTaskCreatedStateMachine
-      definition:
-        Comment: A state machine happens after a group task is created.
-        StartAt: notifyWhenGroupTaskCreated
-        States:
-          notifyWhenGroupTaskCreated:
-            Type: Task
-            Resource: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-notifyWhenGroupTaskCreated"
-            Next: waitUntilExpiry
-          waitUntilExpiry:
-            Type: Wait
-            SecondsPath: "$.expiresAfterInSeconds"
-            Next: notifyWhenGroupTaskExpired
-          notifyWhenGroupTaskExpired:
-            Type: Task
-            Resource: "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-notifyWhenGroupTaskExpired"
-            End: true
-
-resources:
-  Resources:
-    GatewayResponseDefault4XX:
-      Type: 'AWS::ApiGateway::GatewayResponse'
-      Properties:
-        ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
-        ResponseType: DEFAULT_4XX
-        RestApiId:
-          Ref: 'ApiGatewayRestApi'
-    TraineesDynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: id
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-        TableName: trainees
-    ContributorsDynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: id
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-        TableName: contributors
-    IndividualTasksDynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: id
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-        TableName: individualTasks
-    GroupsDynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: id
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-        TableName: groups
-    GroupTasksDynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: id
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-        TableName: groupTasks
-custom:
-  # stage: ${opt:stage}
-  authorizer:
-    users:
-      name: auth
-      type: TOKEN
-      identitySource: method.request.header.Authorization
-      identityValidationExpression: Bearer (.*)
-
+# you can add CloudFormation resource templates here
+#resources:
+#  Resources:
+#    NewResource:
+#      Type: AWS::S3::Bucket
+#      Properties:
+#        BucketName: my-new-bucket
+#  Outputs:
+#     NewOutput:
+#       Description: "Description for the output"
+#       Value: "Some output value"
