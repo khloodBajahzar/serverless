@@ -27,14 +27,14 @@ functions:
     handler: handler.authContributor
   authTrainee:
     handler: handler.authTrainee
-  private:
-    handler: handler.private
-     events:
-       - http:
-           path: private
-           method: get
-           cors: true
-          authorizer: ${self:custom.authorizer.users}
+  #private:
+   # handler: handler.private
+    # events:
+     #  - http:
+      #     path: private
+       #    method: get
+        #   cors: true
+         # authorizer: ${self:custom.authorizer.users}
   sendEmailToAll:
     handler: handler.sendEmailToAll
     events:
